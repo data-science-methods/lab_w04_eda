@@ -16,13 +16,16 @@
 #' We'll be accessing the dataset using the `AmesHousing` package.  (Strictly speaking, we'll be using a CSV that I generated from one version in the `AmesHousing` package, because it gives us a chance to learn a few things about factors.)  It'll be useful to have the documentation for `AmesHousing::ames_raw` open, because it gives short descriptions of the many variables in the dataset:  <https://cran.r-project.org/web/packages/AmesHousing/AmesHousing.pdf>.  You can find a full codebook for the dataset at <http://jse.amstat.org/v19n3/decock/DataDocumentation.txt>. 
 #' 
 
+#testing
+
 ## Setup
 ## **IMPORTANT**: Add all dependencies to `DESCRIPTION`
 library(tidyverse)
 library(skimr)
 library(visdat)
+library(dplyr)
 
-library(AmesHousing)
+library(AmesHousing) 
 
 dataf = read_csv(file.path('data', 'ames.csv'))
 
@@ -36,11 +39,12 @@ dataf = read_csv(file.path('data', 'ames.csv'))
 #' 1. Look through the short descriptions in `?ames_raw` (or online, <https://cran.r-project.org/web/packages/AmesHousing/AmesHousing.pdf>).  Which variable reports the actual sale price? 
 #' 
 #' 
+#' it seems like value, except that it says that is a tibble so I think that isa tibble which i think means its another data table of value stuff? makes zero sense to me how this is organized
 #' 
 
 #' 2. As you were looking through the variable descriptions, you probably noticed a few variables that might be good predictors of sale price.  List two or three here. 
 #' 
-#' 
+#' Overall Qual, Lot Area. I would like one for value of neighboring houses but I dont see one.
 #' 
 
 
@@ -49,23 +53,30 @@ dataf = read_csv(file.path('data', 'ames.csv'))
 #' 
 #' 1. The paper abstract (see above) reports 2930 rows.  How many observations (rows) are in our version of the dataset?  
 #' 
-problem2.1 = 1.7e15 # scientific notation: 1.7 x 10^15
+problem2.1 = 2930 # scientific notation: 1.7 x 10^15
+
+skimr::skim(dataf)
+#the skimr dunct gives a print out that says 293- is there a functional p[rogramming way of accessing that part of the returned tibble to set it as the answer?
+
+
 
 #' 2. The abstract also reports 80 "explanatory variables (23 nominal, 23 ordinal, 14 discrete, and 20 continuous)."  In R, factors are used for both nominal and ordinal; and numerics are used for both discrete and continuous. How many of each are in our version?
 #' 
-problem2.2.factors = 7
-problem2.2.characters = 18000
-problem2.2.numerics = 12
+#' 
+#' for the number of factors it says there are 81 columns, I am assuming one of those is the index column and thus we have 80 variables. its hard to say though looking at skimr output. 
+problem2.2.factors = 80
+problem2.2.characters = 46
+problem2.2.numerics = 35
 
 #' 3. Explain any discrepancies here. 
 #' 
-#' 
+#' There are 81 columns in our data and it says we have 46 plus 35 variables so trheres 81 asnd we shoud have 80, but I thihnk one is probably the index
+#'
 #' 
 
 #' 4. How many variables have missing values?  
 #' 
-problem2.4 = 937
-
+problem2.4 = 0
 
 #' # Problem 3 #
 #' `summarize()` is a tidyverse function that collapses multiple rows of data into a single row.  Like `mutate()` and `count()`, it respects groups constructed by `group_by()`.  Here's an example: 
@@ -77,7 +88,7 @@ dataf %>%
 
 #' 1. Examine the full codebook, at <http://jse.amstat.org/v19n3/decock/DataDocumentation.txt>.  What do the values of MS_Zoning represent? 
 #' 
-#' 
+#' I dont follow the question? these are citiy district zoning labels, bu the description in the code book are almost exaclty the same as whats in the table, they arent acronyms or anything. Is there something im missing?
 #' 
 
 #' 2. Run the following two expressions.  Why do they give different results? 
@@ -97,6 +108,10 @@ dataf %>%
     ungroup()
 
 
+#in the first we filter before we zummarize and in the second we summarize first. so in the second were getting rid of the summaries that are below 100k and in the first we getting rid of everyone below 100k before we summarize so the averages could be higher in the first
+
+
+
 #' # Problem 4 #
 #' Now we'll take a look at some of the items on the checklist from Huebner et al. 
 #' 
@@ -114,8 +129,11 @@ distinct(dup_demo)
 #' Use this function to create a dataframe `dataf_nodup` with the duplicate rows removed.  Do `dataf` and `dataf_nodup` have the same number of rows?  What does this tell you about duplicate entries in our dataset?  
 #' 
 #' 
-#' 
-# dataf_nodup = ???
+#' they do. is there a way to do a tibble.shape?
+# dataf_nodup = 2930
+
+
+distinct(dataf)
 
 
 #' # Problem 5 #
@@ -123,13 +141,20 @@ distinct(dup_demo)
 #' 
 #' 1. What's the class of the overall condition variable, `Overall_Cond`? 
 #' 
+#' character, its a bunch of strings
 #' 
-#' 
+
+#dataf$Overall_Cond
+#class(dataf$Overall_Cond)
+
 
 #' 2. Tidyverse functions are generally pretty good about treating a character variable as a factor when it makes sense to do so.  Use `count()` to get a count of the number of houses by overall condition; assign this data frame to `cond_count`. 
 #'  
 
 # cond_count = ???
+
+cond_count = count(dataf,Overall_Cond)
+
 
 #' 3. However, notice that the possible values of the variable (called the *levels* of the factor) are in alphabetical order, not from "Very Poor" through "Average" to "Excellent" as intended.  We would see the same thing if we try to coerce `Overall_Cond` to a factor:  
 
@@ -139,11 +164,14 @@ levels(bad_factor)
 
 #' To fix this, we need to set the order of the levels manually.  First, edit the next line, so that the levels correspond to the list in the documentation, with "Very Poor" as the lowest (first) value and "Very Excellent" as the highest (<http://jse.amstat.org/v19n3/decock/DataDocumentation.txt>, search for "Overall Cond").  
 
-condition_levels = c('Above_Average', 'Very_Poor', 'Below_Average')
+
+# "Above_Average" "Average"       "Below_Average" "Excellent"     "Fair"          "Good"          "Poor"          "Very_Good"     "Very_Poor"
+
+condition_levels = c("Very_Poor", "Poor", "Fair", "Below_Average", "Average", "Above_Average", "Good", "Very_Good", "Excellent")
 
 #' 4. To fix the levels, we use the `levels = ` argument in `factor()`.  Modify the code for `bad_factor` above, assigning the result to `good_factor`.  Confirm that the levels are in the right order. 
 
-# good_factor = ???
+good_factor = factor(dataf$Overall_Cond, levels = condition_levels)
 
 #' 5. Finally we want this factor to be in our analysis dataframe.  *Normally, to preserve immutability*, I would do this right after reading in the CSV (using a pipe).  We'll talk more about this when we work on cleaning data.  For this lab, just do it here.  
 #' 
@@ -151,6 +179,8 @@ condition_levels = c('Above_Average', 'Very_Poor', 'Below_Average')
 
 # dataf = ???
 
+dataf %>% 
+    mutate(overall_cond_fct = good_factor)
 
 #' # Problem 6 #
 #' Recall that we're interested in finding variables that are highly correlated with sale price.  We can use the function `cor()` to construct a correlation matrix, with correlations between all pairs of variables in the dataframe.  But this creates two challenges.  First, `cor()` only works with numerical inputs.  If we try it with our current dataframe, it throws an error:  
@@ -169,6 +199,8 @@ select(dataf, Sale_Price, Overall_Cond, Gr_Liv_Area)
 
 # dataf_smol = select(???, where(???), where(???))
 
+dataf_smol = select(dataf, where(is.numeric), where(is.factor))
+
 #' 2. `cor()` doesn't like factors.  `as.integer()` will coerce a factor into an integer representation; then `method = 'spearman'` will tell `cor()` to use Spearman correlation instead of Pearson correlation.  (Spearman correlation is based on the rank of the variable values, rather than the values directly.  This is a standard approach for dealing with correlations of ordinal variables.)
 #' 
 #' Fill in the blank: 
@@ -177,18 +209,22 @@ select(dataf, Sale_Price, Overall_Cond, Gr_Liv_Area)
 #     mutate(???) %>%
 #     cor(method = 'spearman')
 
+cor_matrix = dataf_smol %>%
+    mutate_if(is.factor, as.numeric) %>%
+    cor(method = 'spearman')
+
 #' 3. Now we convert the correlation matrix into a dataframe.  
 #' a. Explain what the following line of code is doing.  Hint: Read the docs! 
 #' 
 #' 
-#' 
+#' it read the matreix as a tibble. like aslist or asarray. Is there something more menaingful im missing here?
 
-# cor_df = as_tibble(cor_matrix, rownames = 'covar')
+cor_df = as_tibble(cor_matrix, rownames = 'covar')
 
 #' b. What do the rows of `cor_df` represent?  The columns?  The values in each cell? 
-#' - rows: 
-#' - columns: 
-#' - values: 
+#' - rows: variables
+#' - columns: same variables
+#' - values: correlation between row var and col var
 
 #' 4. We've calculated the correlations for each pair of variables.  Now we want to construct a table with the top 10 most highly-correlated variables.  Write a pipe that does the following, in order:  
 #' - Start with `cor_df`
@@ -198,9 +234,13 @@ select(dataf, Sale_Price, Overall_Cond, Gr_Liv_Area)
 #' - Assigns the result to the variable `top_10`
 #' 
 
+cor_df %>% 
+    select(covar, Sale_Price) %>% 
+    top_n(10,Sale_Price)
+
 
 #' # Problem 7 #
 #' In 1.2, you identified some variables that you thought might be good predictors of sale price.  How good were your expectations? 
 #' 
-#' 
+#' Not good lol how ius quality not predictive trhats crazy haha
 #' 
