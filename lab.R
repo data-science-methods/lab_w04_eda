@@ -18,11 +18,15 @@
 
 ## Setup
 ## **IMPORTANT**: Add all dependencies to `DESCRIPTION`
+install.packages("dplyer")
 library(tidyverse)
+library(tidyselect)
 library(skimr)
 library(visdat)
 library(dplyr)
 library(AmesHousing)
+
+
 
 dataf = read_csv(file.path('data', 'ames.csv'))
 
@@ -176,40 +180,51 @@ select(dataf, Sale_Price, Overall_Cond, Gr_Liv_Area)
 #' Look for functions that start with `is`.  
 #' Check the documentation for `where()` to see examples. 
 
-dataf_smol = dataf %>% select(where(is.numeric), where(is.factor))
+dataf_smol = dataf %>% dplyr::select(where(is.numeric), where(is.factor))
 
-#' 2. `cor()` doesn't like factors.  `as.integer()` will coerce a factor into an integer representation; then `method = 'spearman'` will tell `cor()` to use Spearman correlation instead of Pearson correlation.  (Spearman correlation is based on the rank of the variable values, rather than the values directly.  This is a standard approach for dealing with correlations of ordinal variables.)
+#' 2. `cor()` doesn't like factors.  
+#' `as.integer()` will coerce a factor into an integer representation; 
+#' then `method = 'spearman'` will tell `cor()` to use Spearman correlation instead of Pearson correlation.  
+#' (Spearman correlation is based on the rank of the variable values, 
+#' rather than the values directly.  
+#' This is a standard approach for dealing with correlations of ordinal variables.)
 #' 
 #' Fill in the blank: 
 
-# cor_matrix = dataf_smol %>%
-#     mutate(???) %>%
-#     cor(method = 'spearman')
+cor_matrix = dataf_smol %>%
+     mutate_if(is.factor, as.integer) %>%
+     cor(method = 'spearman')
 
 #' 3. Now we convert the correlation matrix into a dataframe.  
 #' a. Explain what the following line of code is doing.  Hint: Read the docs! 
-#' 
-#' 
-#' 
+#' This line of codding can covert the correlation matrix into tibble, whcih is a simplied version of data.frame.
+#' "rownames = 'covar'" allows us to keep the first existing rownames in cor_matrix, and name it "covar".
+#' So we'll have a new column called "covar".
 
-# cor_df = as_tibble(cor_matrix, rownames = 'covar')
+cor_df = as_tibble(cor_matrix, rownames = 'covar')
 
 #' b. What do the rows of `cor_df` represent?  The columns?  The values in each cell? 
-#' - rows: 
-#' - columns: 
-#' - values: 
+#' - rows: a set of variables in Spearman correlation calculation
+#' - columns: corresponding variables in Spearman correlation calculation
+#' - values: the Spearman correlation coefficient for each pair
 
-#' 4. We've calculated the correlations for each pair of variables.  Now we want to construct a table with the top 10 most highly-correlated variables.  Write a pipe that does the following, in order:  
+#' 4. We've calculated the correlations for each pair of variables.  
+#' Now we want to construct a table with the top 10 most highly-correlated variables. 
+#'  Write a pipe that does the following, in order:  
 #' - Start with `cor_df`
 #' - Select the columns with the name of each covariate and its correlation with sale price
 #' - Arrange them in descending order, starting with the strongest positive correlation
 #' - Keep the top 10 rows.  Hint: `?top_n`
 #' - Assigns the result to the variable `top_10`
-#' 
+top_10 <- cor_df %>% 
+    select(covar, Sale_Price) %>%
+    arrange(desc(Sale_Price)) %>%
+    top_n(10)
+    
 
 
 #' # Problem 7 #
 #' In 1.2, you identified some variables that you thought might be good predictors of sale price.  How good were your expectations? 
-#' 
+#' My previous guess are MS SubClass and MS Zoning, and obviously they are not good prediction of sale price.
 #' 
 #' 
