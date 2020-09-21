@@ -1,7 +1,7 @@
 #' ---
 #' title: "Data Science Methods, Lab for Week 99"
-#' author: "Your Name"
-#' email: Your Email
+#' author: "Chaohong Pan"
+#' email:  cpan9 at ucmerced.edu
 #' output:
 #'   html_document:
 #'     toc: true
@@ -39,9 +39,9 @@ dataf = read_csv(file.path('data', 'ames.csv'))
 #' 
 
 #' 2. As you were looking through the variable descriptions, you probably noticed a few variables that might be good predictors of sale price.  List two or three here. 
-#' 
-#' 
-#' 
+#' MS SubClass
+#' MS Zoning
+
 
 
 #' # Problem 2 #
