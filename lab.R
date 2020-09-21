@@ -21,7 +21,7 @@
 library(tidyverse)
 library(skimr)
 library(visdat)
-
+library(dplyr)
 library(AmesHousing)
 
 dataf = read_csv(file.path('data', 'ames.csv'))
@@ -176,7 +176,7 @@ select(dataf, Sale_Price, Overall_Cond, Gr_Liv_Area)
 #' Look for functions that start with `is`.  
 #' Check the documentation for `where()` to see examples. 
 
-dataf_smol = select(dataf, where(numeric()), where(factor()))
+dataf_smol = dataf %>% select(where(is.numeric), where(is.factor))
 
 #' 2. `cor()` doesn't like factors.  `as.integer()` will coerce a factor into an integer representation; then `method = 'spearman'` will tell `cor()` to use Spearman correlation instead of Pearson correlation.  (Spearman correlation is based on the rank of the variable values, rather than the values directly.  This is a standard approach for dealing with correlations of ordinal variables.)
 #' 

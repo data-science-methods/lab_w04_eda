@@ -4,5 +4,6 @@ Imports:
     skimr,
     visdat,
     AmesHousing
+    dplyr
 
     
