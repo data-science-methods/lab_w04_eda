@@ -1,7 +1,7 @@
 #' ---
 #' title: "Data Science Methods, Lab for Week 99"
-#' author: "Your Name"
-#' email: Your Email
+#' author: "Joshua Clingo"
+#' email: jclingo@ucmerced.edu
 #' output:
 #'   html_document:
 #'     toc: true
@@ -27,7 +27,7 @@ library(AmesHousing)
 dataf = read_csv(file.path('data', 'ames.csv'))
 
 ## To check your answers locally, run the following: 
-## testthat::test_dir('tests')
+#testthat::test_dir('tests')
 
 
 #' # Problem 1 #
@@ -35,12 +35,20 @@ dataf = read_csv(file.path('data', 'ames.csv'))
 #' 
 #' 1. Look through the short descriptions in `?ames_raw` (or online, <https://cran.r-project.org/web/packages/AmesHousing/AmesHousing.pdf>).  Which variable reports the actual sale price? 
 #' 
+#' Sale_Price
+#'
 #' 
 #' 
 
 #' 2. As you were looking through the variable descriptions, you probably noticed a few variables that might be good predictors of sale price.  List two or three here. 
 #' 
-#' 
+#' Lot_Area
+#' First_Flr_SF
+#' Second_Flr_SF (in tandem w/ First_Flr_SF)
+#' Gr_Live_Area
+#' Garage_Area
+#' Garage_Cars
+#' Yr_Built
 #' 
 
 
@@ -49,22 +57,26 @@ dataf = read_csv(file.path('data', 'ames.csv'))
 #' 
 #' 1. The paper abstract (see above) reports 2930 rows.  How many observations (rows) are in our version of the dataset?  
 #' 
-problem2.1 = 1.7e15 # scientific notation: 1.7 x 10^15
+#' 
+
+skimr::skim(dataf)
+
+problem2.1 = 2930
 
 #' 2. The abstract also reports 80 "explanatory variables (23 nominal, 23 ordinal, 14 discrete, and 20 continuous)."  In R, factors are used for both nominal and ordinal; and numerics are used for both discrete and continuous. How many of each are in our version?
 #' 
-problem2.2.factors = 7
-problem2.2.characters = 18000
-problem2.2.numerics = 12
+problem2.2.factors = 0
+problem2.2.characters = 46
+problem2.2.numerics = 35
 
 #' 3. Explain any discrepancies here. 
 #' 
-#' 
+#' There are actually 81 columns
 #' 
 
 #' 4. How many variables have missing values?  
 #' 
-problem2.4 = 937
+problem2.4 = 0
 
 
 #' # Problem 3 #
@@ -77,14 +89,29 @@ dataf %>%
 
 #' 1. Examine the full codebook, at <http://jse.amstat.org/v19n3/decock/DataDocumentation.txt>.  What do the values of MS_Zoning represent? 
 #' 
+# A	Agriculture
+# C	Commercial
+# FV	Floating Village Residential
+# I	Industrial
+# RH	Residential High Density
+# RL	Residential Low Density
+# RP	Residential Low Density Park 
+# RM	Residential Medium Density
 #' 
 #' 
 
 #' 2. Run the following two expressions.  Why do they give different results? 
 #' 
+#' The first expression takes the dataframe, groups by zoning, cuts out properties that sold for less than $100K, 
+#' then collapses the remainder into a single value (the mean sale price of homes of each group which sold for more than $100K)
 #' 
+#' The second expression takes the dataframe, groups by zoning, collapses each grouped property into a single value 
+#' (the mean sale price of all homes of each group), then filters out groups with a mean Sale_Price of more than $100K
 #' 
-dataf %>% 
+#' IOW, the first filters lower-priced homes out first and only finds the average of the more expensive homes by group. 
+#' The second finds the average of all homes of each group but then cuts out the groups themselves
+#' 
+dataf %>%
     group_by(MS_Zoning) %>% 
     filter(Sale_Price > 100000) %>% 
     summarize(Sale_Price = mean(Sale_Price)) %>% 
@@ -113,9 +140,13 @@ distinct(dup_demo)
 
 #' Use this function to create a dataframe `dataf_nodup` with the duplicate rows removed.  Do `dataf` and `dataf_nodup` have the same number of rows?  What does this tell you about duplicate entries in our dataset?  
 #' 
+#' Yup, same number
+#' Tells us all the rows are unique (this is unsurprising, as there is a great number of columns)
 #' 
 #' 
-# dataf_nodup = ???
+dataf_nodup = distinct(dataf)
+skimr::skim(dataf)
+skimr::skim(dataf_nodup)
 
 
 #' # Problem 5 #
@@ -123,13 +154,14 @@ distinct(dup_demo)
 #' 
 #' 1. What's the class of the overall condition variable, `Overall_Cond`? 
 #' 
+#' R treats it as a character (the set of possible values is Very_Poor, Poor, Below_Average, Average, Above_Average, Fair, Good, Very_Good, Excellent, and Very_Excellent)
 #' 
 #' 
 
 #' 2. Tidyverse functions are generally pretty good about treating a character variable as a factor when it makes sense to do so.  Use `count()` to get a count of the number of houses by overall condition; assign this data frame to `cond_count`. 
 #'  
 
-# cond_count = ???
+cond_count = count(dataf, Overall_Cond)
 
 #' 3. However, notice that the possible values of the variable (called the *levels* of the factor) are in alphabetical order, not from "Very Poor" through "Average" to "Excellent" as intended.  We would see the same thing if we try to coerce `Overall_Cond` to a factor:  
 
@@ -139,17 +171,17 @@ levels(bad_factor)
 
 #' To fix this, we need to set the order of the levels manually.  First, edit the next line, so that the levels correspond to the list in the documentation, with "Very Poor" as the lowest (first) value and "Very Excellent" as the highest (<http://jse.amstat.org/v19n3/decock/DataDocumentation.txt>, search for "Overall Cond").  
 
-condition_levels = c('Above_Average', 'Very_Poor', 'Below_Average')
+condition_levels = c('Very_Poor', 'Poor', 'Fair', 'Below_Average', 'Average', 'Above_Average', 'Good', 'Very_Good', 'Excellent', 'Very_Excellent')
 
 #' 4. To fix the levels, we use the `levels = ` argument in `factor()`.  Modify the code for `bad_factor` above, assigning the result to `good_factor`.  Confirm that the levels are in the right order. 
 
-# good_factor = ???
+good_factor = factor(dataf$Overall_Cond, levels = condition_levels)
 
 #' 5. Finally we want this factor to be in our analysis dataframe.  *Normally, to preserve immutability*, I would do this right after reading in the CSV (using a pipe).  We'll talk more about this when we work on cleaning data.  For this lab, just do it here.  
-#' 
+#' D:
 #' Using `mutate()`, add a variable `overall_cond_fct` to `dataf`, that represents overall condition as a factor with the levels in the correct order. 
 
-# dataf = ???
+dataf = mutate(dataf, overall_cond_fct = good_factor)
 
 
 #' # Problem 6 #
@@ -167,28 +199,30 @@ select(dataf, Sale_Price, Overall_Cond, Gr_Liv_Area)
 #' 
 #' Fill in the blanks in the following code.  Hints: Use `?factor` and `?numeric` to bring up documentation for these classes.  Look for functions that start with `is`.  Check the documentation for `where()` to see examples. 
 
-# dataf_smol = select(???, where(???), where(???))
+dataf_smol = select(dataf, where(is.factor), where(is.numeric))
+skimr::skim(dataf_smol)
 
 #' 2. `cor()` doesn't like factors.  `as.integer()` will coerce a factor into an integer representation; then `method = 'spearman'` will tell `cor()` to use Spearman correlation instead of Pearson correlation.  (Spearman correlation is based on the rank of the variable values, rather than the values directly.  This is a standard approach for dealing with correlations of ordinal variables.)
 #' 
 #' Fill in the blank: 
 
-# cor_matrix = dataf_smol %>%
-#     mutate(???) %>%
-#     cor(method = 'spearman')
+cor_matrix = dataf_smol %>%
+     mutate(overall_cond_fct = as.integer(overall_cond_fct)) %>%
+     cor(method = 'spearman')
 
 #' 3. Now we convert the correlation matrix into a dataframe.  
 #' a. Explain what the following line of code is doing.  Hint: Read the docs! 
 #' 
+#' Takes the correlation matrix, turns it into a tibble, and renames the names column 'covar' 
 #' 
 #' 
 
-# cor_df = as_tibble(cor_matrix, rownames = 'covar')
-
+cor_df = as_tibble(cor_matrix, rownames = 'covar')
+skimr::skim(cor_df)
 #' b. What do the rows of `cor_df` represent?  The columns?  The values in each cell? 
-#' - rows: 
-#' - columns: 
-#' - values: 
+#' - rows: The numeric parameters in the dataset
+#' - columns: The numeric parameters in the dataset
+#' - values: The correlation between intersecting parameters in the dataset
 
 #' 4. We've calculated the correlations for each pair of variables.  Now we want to construct a table with the top 10 most highly-correlated variables.  Write a pipe that does the following, in order:  
 #' - Start with `cor_df`
@@ -197,10 +231,52 @@ select(dataf, Sale_Price, Overall_Cond, Gr_Liv_Area)
 #' - Keep the top 10 rows.  Hint: `?top_n`
 #' - Assigns the result to the variable `top_10`
 #' 
-
-
+top_10 =
+    cor_df %>% 
+        select(covar, Sale_Price) %>% 
+        arrange(desc(Sale_Price)) %>% #defaults to descending
+        top_n(10)
+    
+skimr::skim(top_10)
+# filter(covar != 'Sale_Price') %>%  Guess we're allowed to keep this in!
 #' # Problem 7 #
 #' In 1.2, you identified some variables that you thought might be good predictors of sale price.  How good were your expectations? 
 #' 
+#' Guesses were pretty good, except for lot area, which I thought would matter. 
+#' My guess is that the land is really cheap in the area (which is reflected in the price of the homes).
+#' In a prime location, I'd expect lot size to be more important 
+#' 
+#' Full Bath is definitely a surprise, tho. Who would have thought? (I think this reflects on the nature of the properties--these are inexpensive homes.)
+#' 
+#' 
+# Gr_Liv_Area
+# 0.7233420
+# 
+# Garage_Cars
+# 0.7015454
+# 
+# Year_Built
+# 0.6808224
+# 
+# Garage_Area
+# 0.6604747
+# 
+# Full_Bath
+# 0.6341608
+# 
+# Total_Bsmt_SF
+# 0.6065643
+# 
+# Year_Remod_Add
+# 0.6014539
+# 
+# First_Flr_SF
+# 0.5815358
+# 
+# Fireplaces
+# 0.5261372
+# 
+# TotRms_AbvGrd
+# 0.4992534
 #' 
 #' 
