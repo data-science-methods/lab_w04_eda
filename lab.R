@@ -27,7 +27,7 @@ library(AmesHousing)
 dataf = read_csv(file.path('data', 'ames.csv'))
 
 ## To check your answers locally, run the following: 
-## testthat::test_dir('tests')
+testthat::test_dir('tests')
 
 
 #' # Problem 1 #
@@ -35,7 +35,7 @@ dataf = read_csv(file.path('data', 'ames.csv'))
 #' 
 #' 1. Look through the short descriptions in `?ames_raw` (or online, <https://cran.r-project.org/web/packages/AmesHousing/AmesHousing.pdf>).  Which variable reports the actual sale price? 
 #' 
-#' 
+#' The variable that actually reports the actual sale price is 'Sale_Price'
 #' 
 
 #' 2. As you were looking through the variable descriptions, you probably noticed a few variables that might be good predictors of sale price.  List two or three here. 
