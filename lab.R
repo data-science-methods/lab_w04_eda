@@ -21,13 +21,13 @@
 library(tidyverse)
 library(skimr)
 library(visdat)
-
+library(testthat)
 library(AmesHousing)
 
 dataf = read_csv(file.path('data', 'ames.csv'))
 
 ## To check your answers locally, run the following: 
-testthat::test_dir('tests')
+# testthat::test_dir('tests')
 
 
 #' # Problem 1 #
@@ -39,32 +39,33 @@ testthat::test_dir('tests')
 #' 
 
 #' 2. As you were looking through the variable descriptions, you probably noticed a few variables that might be good predictors of sale price.  List two or three here. 
-#' 
-#' 
-#' 
+#' Neighborhood
+#' Overall_Cond
+#' Yr_Sold
 
 
 #' # Problem 2 #
 #' We've already loaded the data, so let's jump to step 3, "Check the packaging," and 5, "Check your 'n's." Use `skimr::skim()` and `vis_dat` functions to answer the following questions.  To report the values that you find, replace the value assigned to the `problem` variable.  
-#' 
+#' skim(dataf) 
+#'
 #' 1. The paper abstract (see above) reports 2930 rows.  How many observations (rows) are in our version of the dataset?  
 #' 
-problem2.1 = 1.7e15 # scientific notation: 1.7 x 10^15
+problem2.1 = 2930 # scientific notation: 1.7 x 10^15
 
 #' 2. The abstract also reports 80 "explanatory variables (23 nominal, 23 ordinal, 14 discrete, and 20 continuous)."  In R, factors are used for both nominal and ordinal; and numerics are used for both discrete and continuous. How many of each are in our version?
 #' 
-problem2.2.factors = 7
-problem2.2.characters = 18000
-problem2.2.numerics = 12
+problem2.2.factors = 0
+problem2.2.characters = 46
+problem2.2.numerics = 35
 
 #' 3. Explain any discrepancies here. 
-#' 
+#' There seem to be one additional variable in the numeric category 
 #' 
 #' 
 
 #' 4. How many variables have missing values?  
-#' 
-problem2.4 = 937
+#' vis_miss(dataf)
+problem2.4 = 0
 
 
 #' # Problem 3 #
@@ -76,13 +77,20 @@ dataf %>%
     ungroup()
 
 #' 1. Examine the full codebook, at <http://jse.amstat.org/v19n3/decock/DataDocumentation.txt>.  What do the values of MS_Zoning represent? 
-#' 
+#' The values of MS_Zoning represent the general zoning classification of the sale.
 #' 
 #' 
 
 #' 2. Run the following two expressions.  Why do they give different results? 
+#' They differ in results because the filtering is not done in the same fashion. In the first case we take
+#' the data, group them by zoning, then select only the values in each zoning category that have a 
+#' Sale price greater than $100000, then we take the mean of those zoning categories that have had
+#' Sale price greater than $100000.
 #' 
+#' In the second case, we we take the data, group them by zoning then take the mean Sale Price of 
+#' each zoning category, then select those categories that have a mean greater than $100000.
 #' 
+#'
 #' 
 dataf %>% 
     group_by(MS_Zoning) %>% 
@@ -95,7 +103,6 @@ dataf %>%
     summarize(Sale_Price = mean(Sale_Price)) %>% 
     filter(Sale_Price > 100000) %>% 
     ungroup()
-
 
 #' # Problem 4 #
 #' Now we'll take a look at some of the items on the checklist from Huebner et al. 
@@ -112,11 +119,12 @@ dup_demo
 distinct(dup_demo)
 
 #' Use this function to create a dataframe `dataf_nodup` with the duplicate rows removed.  Do `dataf` and `dataf_nodup` have the same number of rows?  What does this tell you about duplicate entries in our dataset?  
+#' Yes dataf and dataf_nodup have the same numbers of rows. This seems to suggests that there is no duplicate entries in our dataset
 #' 
 #' 
-#' 
-# dataf_nodup = ???
-
+dataf_nodup = distinct(dataf)
+nrow(dataf)
+nrow(dataf_nodup)
 
 #' # Problem 5 #
 #' *Coding ordinal variables*: R uses the class `factor` to represent categorical (also called "nominal") and ordinal variables.  Because the CSV format doesn't have a way to document the variable type for its columns, when we load a CSV into R the categorical and ordinal variables get parsed as characters rather than factors.  
