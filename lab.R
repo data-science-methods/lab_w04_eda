@@ -59,8 +59,8 @@ problem2.2.characters = 46
 problem2.2.numerics = 35
 
 #' 3. Explain any discrepancies here. 
-#' There seem to be one additional variable in the numeric category 
-#' 
+#' The reason why there is a discrepancy here is because (as explained in the code book) the variables Garage Yr Blt was not included in our dataset (because of missing data); the varibles PID and Order were also removed bringing the total number of variables 79;
+#' but they included Longitude and Latitude variables which brings the number of variables to 81. This conforms to what we see in the dataset.  
 #' 
 
 #' 4. How many variables have missing values?  
