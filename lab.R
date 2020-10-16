@@ -27,7 +27,7 @@ library(AmesHousing)
 dataf = read_csv(file.path('data', 'ames.csv'))
 
 ## To check your answers locally, run the following: 
-testthat::test_dir('tests')
+# testthat::test_dir('tests')
 
 
 #' # Problem 1 #
@@ -158,12 +158,12 @@ levels(good_factor)
 #' 
 #' Using `mutate()`, add a variable `overall_cond_fct` to `dataf`, that represents overall condition as a factor with the levels in the correct order. 
 
-dataf = mutate(dataf,overall_cond_fact = good_factor)
+dataf = mutate(dataf,overall_cond_fct = good_factor)
 
 
 #' # Problem 6 #
 #' Recall that we're interested in finding variables that are highly correlated with sale price.  We can use the function `cor()` to construct a correlation matrix, with correlations between all pairs of variables in the dataframe.  But this creates two challenges.  First, `cor()` only works with numerical inputs.  If we try it with our current dataframe, it throws an error:  
-cor(dataf)
+# cor(dataf)
 #' Second, the result will be a matrix — a 2D collection of numbers — rather than a dataframe.  We'll need to convert it back to a dataframe to use our familiar tidyverse tools.  
 #' 
 #' 1. We can use the tidyverse function `select()` to pull out a given set of columns from the dataframe.  
@@ -183,7 +183,7 @@ dataf_smol = select(dataf, where(is.factor), where(is.numeric))
 #' Fill in the blank: 
 
 cor_matrix = dataf_smol %>%
-    mutate(overall_cond_fact = as.integer(overall_cond_fact)) %>%
+    mutate(overall_cond_fct = as.integer(overall_cond_fct)) %>%
     cor(method = 'spearman')
 
 #' 3. Now we convert the correlation matrix into a dataframe.  
