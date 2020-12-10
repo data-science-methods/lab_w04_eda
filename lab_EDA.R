@@ -1,7 +1,7 @@
 #' ---
 #' title: "Data Science Methods, Lab for Week 99"
-#' author: Alex Dayer
-#' email: adayer@ucmerced.edu 
+#' author: "Your Name"
+#' email: Your Email
 #' output:
 #'   html_document:
 #'     toc: true
